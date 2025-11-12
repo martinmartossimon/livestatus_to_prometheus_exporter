@@ -165,6 +165,8 @@ BEGIN {
         }
     }
 
-}' "$ARCHIVO_SALIDA_LIMPIO" > "$OUTPUT_FILE"
+}' "$ARCHIVO_SALIDA_LIMPIO" > "$OUTPUT_FILE" || {
+    echo "⚠️ Error generando métricas Prometheus en la seccion de awk"
+}
 
 echo "[$(date '+%H:%M:%S')] ✅ Métricas Prometheus generadas en $OUTPUT_FILE"
