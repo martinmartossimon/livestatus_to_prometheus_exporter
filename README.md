@@ -52,6 +52,7 @@ docker run -d --rm --name livestatus-metrics \
 # Follow logs in real-time
 docker logs -f livestatus-metrics
 ```
+---
 
 ## Prometheus Configuration Example
 Edit as needed for your environment:
@@ -71,6 +72,7 @@ scrape_configs:
 
 ```
 
+---
 
 ## Verification & Logs
 ```bash
@@ -82,6 +84,7 @@ docker logs -f livestatus-metrics
 ```
 ![Logs Output Example](images/LogsOutput.png)
 
+---
 
 ## Extending for Additional Services
 Currently, this exporter collects metrics for CPU (load and utilization), Memory, Filesystems, and PING. To add new services:
@@ -99,6 +102,7 @@ Filter: service_description ~~ ^NewService    # <-- Add your new service here
 Or: 4
 OutputFormat: csv
 
+EOF
 ```
 
 ![Customize livestatus query](images/livestatusQuery.png)
