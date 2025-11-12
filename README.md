@@ -81,3 +81,44 @@ curl http://hostname:9501/metrics.prom
 docker logs -f livestatus-metrics
 ```
 ![Logs Output Example](images/LogsOutput.png)
+
+
+## Extending for Additional Services
+Currently, this exporter collects metrics for CPU (load and utilization), Memory, Filesystems, and PING. To add new services:
+1. Update the Livestatus Query
+Edit the query embedded in generate_metrics.sh to include the new services you want. For example, add new Filter: lines for your service descriptions:
+```bash
+cat > "$tmpfile" <<'EOF'
+GET services
+Columns: host_name description perf_data
+Filter: service_description ~~ ^Memory
+Filter: service_description ~~ ^CPU
+Filter: service_description ~~ ^Filesystem
+Filter: service_description = PING
+Filter: service_description ~~ ^NewService    # <-- Add your new service here
+Or: 4
+OutputFormat: csv
+
+```
+
+![Customize livestatus query](images/livestatusQuery.png)
+
+
+2. Parse the New Service Output:
+The exporter generates Prometheus metrics in the awk section of generate_metrics.sh. Add a new else if block to parse your new service output and convert it into Prometheus metrics:
+
+![Parser Section](images/awk_parser.png)
+
+Example to add:
+```awk
+else if (service == "NewService") {
+    if (match(details, /value=([0-9.]+)/, m))
+        printf "system_resource_usage{hostname=\"%s\",resource=\"new_service\"} %s\n", hostname, m[1]
+}
+```
+
+3. Verify Your Metrics:
+After updating the script, rebuild the container and run it. Check /metrics.prom to confirm your new service metrics are being generated:
+```bash
+curl http://hostname:9501/metrics.prom | grep new_service
+```
