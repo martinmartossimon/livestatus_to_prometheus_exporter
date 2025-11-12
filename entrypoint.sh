@@ -8,10 +8,13 @@ echo "🚀 Iniciando servidor HTTP que expone metricas a prometheus en puerto $P
 
 # Lanzar el bucle del generador en segundo plano
 while true; do
-    echo "[$(date '+%Y-%m-%d %H:%M:%S')] Ejecutando generate_metrics.sh..."
-    ./generate_metrics.sh
-    echo "[$(date '+%Y-%m-%d %H:%M:%S')] Métricas actualizadas."
-    sleep "$INTERVAL"
+    echo "[$(date '+%F %T')] Ejecutando generate_metrics.sh..."
+    if ./generate_metrics.sh; then
+        echo "[$(date '+%F %T')] 🟢 Métricas actualizadas Correctamente 🟢."
+    else
+        echo "[$(date '+%F %T')] ⚠️ Error ejecutando generate_metrics.sh (continuando...)" >&2
+    fi
+    sleep "$SCRAPE_INTERVAL"
 done &
 
 # Servidor HTTP que entrega el archivo con tipo correcto

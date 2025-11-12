@@ -4,7 +4,7 @@ RUN apk add --no-cache bash gawk netcat-openbsd python3 curl
 
 WORKDIR /app
 
-COPY generate_metrics.sh entrypoint.sh query_servicios_metricas_csv.lq ./
+COPY generate_metrics.sh entrypoint.sh ./
 RUN chmod +x *.sh
 
 RUN mkdir -p /app/data

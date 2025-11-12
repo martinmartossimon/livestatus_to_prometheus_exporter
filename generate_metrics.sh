@@ -56,6 +56,7 @@ EOF
     # Enviar asegurando los saltos finales y esperar 1s antes de cerrar
     lines=$( (cat "$tmpfile"; echo; echo) | nc "$colectora" 6557 | tee -a "$ARCHIVO_SALIDA" | wc -l )
     echo "[$(date '+%H:%M:%S')] $colectora → $lines líneas recibidas"
+    echo -e "Head de lo recibido de $colectora:\n$lines" | head -10
     rm -f "$tmpfile"
 }
 
