@@ -1,0 +1,10 @@
+# Ignorar todo dentro de data excepto la carpeta
+data/*
+!data/.gitkeep
+
+# Ignorar archivos de entorno reales
+.env
+
+# Ignorar posibles archivos temporales del sistema
+*.swp
+*.bak
