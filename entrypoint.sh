@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -e
+#set -e
 
 PORT="${PORT:-9100}"
 INTERVAL="${SCRAPE_INTERVAL:-420}"
