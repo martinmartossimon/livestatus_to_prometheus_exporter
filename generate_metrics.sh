@@ -1,6 +1,15 @@
 #!/usr/bin/env bash
 #set -euo pipefail
 
+
+# Cargar variables de entorno desde .env si existe
+if [ -f .env ]; then
+    set -o allexport
+    source .env
+    set +o allexport
+fi
+
+
 ######################################################################
 # Script: generate_metrics.sh
 # Descripción: consulta Livestatus en varios hosts, genera métricas
@@ -37,7 +46,8 @@ Filter: service_description ~~ ^Memory
 Filter: service_description ~~ ^CPU
 Filter: service_description ~~ ^Filesystem
 Filter: service_description = PING
-Or: 4
+Filter: service_description ~~ ^OMD_CantidadNotificaciones_
+Or: 5
 OutputFormat: csv
 
 EOF
@@ -55,7 +65,7 @@ EOF
 mkdir -p "$(dirname "$ARCHIVO_SALIDA")"
 > "$ARCHIVO_SALIDA"
 
-if [ -z "$LIVEHOSTS" ]; then
+if [ -z "$LIVESTATUS_HOSTS" ]; then
     echo "❌ Variable LIVESTATUS_HOSTS no definida en el entorno (.env)"
     exit 1
 fi
@@ -77,6 +87,8 @@ awk -F';' '
 BEGIN {
     print "# HELP system_resource_usage Resource usage percentage"
     print "# TYPE system_resource_usage gauge"
+    print "# HELP omd_notifications OMD notification counters per host"
+    print "# TYPE omd_notifications gauge"
 }
 {
     hostname=$2
@@ -140,6 +152,19 @@ BEGIN {
         if (match(details, /rta=([0-9.]+)ms/, rta))
             printf "system_resource_usage{hostname=\"%s\",resource=\"ping_rta\"} %s\n", hostname, rta[1]
     }
+
+    # --- OMD Cantidad Notificaciones ---
+    else if (service ~ /^OMD_CantidadNotificaciones_/) {
+        # Extrae todas las métricas tipo clave=valor
+        while (match(details, /([a-zA-Z0-9_]+)=([0-9.]+)/, m)) {
+            metric_name = m[1]
+            metric_val = m[2]
+            printf "omd_notifications{hostname=\"%s\",resource=\"%s\"} %s\n", hostname, metric_name, metric_val
+            # Elimina la parte ya procesada para encontrar la siguiente coincidencia
+            details = substr(details, RSTART + RLENGTH)
+        }
+    }
+
 }' "$ARCHIVO_SALIDA_LIMPIO" > "$OUTPUT_FILE"
 
 echo "[$(date '+%H:%M:%S')] ✅ Métricas Prometheus generadas en $OUTPUT_FILE"
