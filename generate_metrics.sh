@@ -23,6 +23,7 @@ ARCHIVO_SALIDA_LIMPIO="${ARCHIVO_SALIDA_LIMPIO:-/app/data/MetricReportLimpio.csv
 OUTPUT_FILE="${OUTPUT_FILE:-/app/data/metrics.prom}"
 SCRAPE_INTERVAL="${SCRAPE_INTERVAL:-420}"
 LIVEHOSTS="${LIVESTATUS_HOSTS:-}"
+TIMEOUT_CONSULTA_LIVESTATUS=15
 
 # === Función auxiliar para esperar procesos ===
 anywait() {
@@ -54,8 +55,9 @@ EOF
 
     echo "[$(date '+%H:%M:%S')] Consultando $colectora ..."
     # Enviar asegurando los saltos finales y esperar 1s antes de cerrar
-    lines=$( (cat "$tmpfile"; echo; echo) | nc "$colectora" 6557 | tee -a "$ARCHIVO_SALIDA" | wc -l )
-    echo "[$(date '+%H:%M:%S')] $colectora → $lines líneas recibidas"
+    lines=$( (cat "$tmpfile"; echo; echo) | timeout $TIMEOUT_CONSULTA_LIVESTATUS nc "$colectora" 6557 | tee -a "$ARCHIVO_SALIDA" | wc -l )
+    COD_SALIDA=$?
+    echo "[$(date '+%H:%M:%S')] $colectora → $lines líneas recibidas - Codigo Salida nc: $COD_SALIDA"
     rm -f "$tmpfile"
 }
 
@@ -164,7 +166,10 @@ BEGIN {
             details = substr(details, RSTART + RLENGTH)
         }
     }
-
+    processed=1
+}
+END {
+    if (!processed) print "⚠️ Warning: no se procesó ninguna línea"
 }' "$ARCHIVO_SALIDA_LIMPIO" > "$OUTPUT_FILE" || {
     echo "⚠️ Error generando métricas Prometheus en la seccion de awk"
 }
