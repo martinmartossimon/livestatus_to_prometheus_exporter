@@ -4,15 +4,15 @@
 PORT="${PORT:-9100}"
 INTERVAL="${SCRAPE_INTERVAL:-420}"
 
-echo "🚀 Iniciando servidor HTTP que expone metricas a prometheus en puerto $PORT..."
+echo "Iniciando servidor HTTP que expone metricas a prometheus en puerto $PORT..."
 
 # Lanzar el bucle del generador en segundo plano
 while true; do
     echo "[$(date '+%F %T')] Ejecutando generate_metrics.sh..."
     if ./generate_metrics.sh; then
-        echo "[$(date '+%F %T')] 🟢 Métricas actualizadas Correctamente 🟢."
+        echo "[$(date '+%F %T')] - Metricas actualizadas Correctamente."
     else
-        echo "[$(date '+%F %T')] ⚠️ Error ejecutando generate_metrics.sh (continuando...)" >&2
+        echo "[$(date '+%F %T')] - Error ejecutando generate_metrics.sh (continuando...)" >&2
     fi
     sleep "$SCRAPE_INTERVAL"
 done &
@@ -41,7 +41,7 @@ class MetricsHandler(http.server.SimpleHTTPRequestHandler):
 
 if __name__ == "__main__":
     with socketserver.TCPServer(("", PORT), MetricsHandler) as httpd:
-        print(f"🌍 Servidor HTTP corriendo en puerto {PORT}")
+        print(f"Servidor HTTP corriendo en puerto {PORT}")
         httpd.serve_forever()
 EOF
 

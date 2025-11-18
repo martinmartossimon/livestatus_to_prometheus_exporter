@@ -68,7 +68,7 @@ mkdir -p "$(dirname "$ARCHIVO_SALIDA")"
 > "$ARCHIVO_SALIDA"
 
 if [ -z "$LIVESTATUS_HOSTS" ]; then
-    echo "❌ Variable LIVESTATUS_HOSTS no definida en el entorno (.env)"
+    echo "Error - Variable LIVESTATUS_HOSTS no definida en el entorno (.env)"
     exit 1
 fi
 
@@ -169,9 +169,9 @@ BEGIN {
     processed=1
 }
 END {
-    if (!processed) print "⚠️ Warning: no se procesó ninguna línea"
+    if (!processed) print "Warning: no se procesó ninguna línea"
 }' "$ARCHIVO_SALIDA_LIMPIO" > "$OUTPUT_FILE" || {
-    echo "⚠️ Error generando métricas Prometheus en la seccion de awk"
+    echo "Error generando métricas Prometheus en la seccion de awk"
 }
 
-echo "[$(date '+%H:%M:%S')] ✅ Métricas Prometheus generadas en $OUTPUT_FILE"
+echo "[$(date '+%H:%M:%S')] Ok - Métricas Prometheus generadas en $OUTPUT_FILE"
